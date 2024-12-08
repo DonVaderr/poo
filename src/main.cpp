@@ -4,6 +4,17 @@
 #include <time.h>
 #include <stdio.h>
 
+typedef enum PantallaJuego
+{
+    MENU,
+    SELECCION_NIVEL,
+    JUEGO,
+    OPCIONES,
+    SALIR,
+    CONFIRMAR_SALIDA,
+    FELICITACIONES,
+    JUEGO_TERMINADO,
+} PantallaJuego;
 
 typedef struct
 {
