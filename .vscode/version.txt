@@ -1,0 +1,512 @@
+#include "raylib.h"
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdio.h>
+
+typedef enum GameScreen
+{
+    MENU,
+    LEVEL_SELECTION,
+    GAME,
+    OPTIONS,
+    CREDITS,
+    CONFIRM_EXIT
+} GameScreen;
+
+typedef struct
+{
+    const char *word;
+    Texture2D image;
+} WordImagePair;
+
+// Función para dividir una palabra en sílabas
+void splitIntoSyllables(const char *word, char syllables[9][10])
+{
+    int length = strlen(word);
+    if (length < 3)
+    {
+        strcpy(syllables[0], word);
+        for (int i = 1; i < 9; i++)
+            syllables[i][0] = '\0';
+    }
+    else
+    {
+        int split1 = rand() % (length / 2) + 1;
+        int split2 = split1 + rand() % ((length - split1) / 2) + 1;
+
+        strncpy(syllables[0], word, split1);
+        syllables[0][split1] = '\0';
+        strncpy(syllables[1], word + split1, split2 - split1);
+        syllables[1][split2 - split1] = '\0';
+        strcpy(syllables[2], word + split2);
+
+        for (int i = 3; i < 9; i++)
+        {
+            int randomWordIndex = rand() % 3;
+            const char *randomWord = word;
+            int randLength = strlen(randomWord);
+            int randSplit1 = rand() % (randLength / 2) + 1;
+            int randSplit2 = randSplit1 + rand() % ((randLength - randSplit1) / 2) + 1;
+
+            strncpy(syllables[i], randomWord + randSplit1, randSplit2 - randSplit1);
+            syllables[i][randSplit2 - randSplit1] = '\0';
+        }
+    }
+}
+
+// Función para mezclar un array de enteros
+void shuffleArray(int *array, int size)
+{
+    for (int i = size - 1; i > 0; i--)
+    {
+        int j = rand() % (i + 1);
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
+// Función para seleccionar palabras e imágenes aleatorias de un arreglo
+void selectRandomWordsAndImages(WordImagePair *sourceArray, int sourceSize, WordImagePair *targetArray, int targetSize)
+{
+    int *indices = (int *)malloc(sourceSize * sizeof(int));
+    for (int i = 0; i < sourceSize; i++)
+        indices[i] = i;
+
+    shuffleArray(indices, sourceSize);
+
+    for (int i = 0; i < targetSize; i++)
+        targetArray[i] = sourceArray[indices[i]];
+
+    free(indices);
+}
+
+int main(void)
+{
+    // Inicialización
+    const int screenWidth = 1200;
+    const int screenHeight = 600;
+
+    InitWindow(screenWidth, screenHeight, "Write & Fun");
+
+    SetTargetFPS(60);  // Establece el límite de FPS
+    srand(time(NULL)); // Inicializa la semilla para números aleatorios
+
+    // Definir estado del juego
+    GameScreen currentScreen = MENU;
+
+    // Arreglos de palabras e imágenes por nivel de dificultad
+    WordImagePair palabrasFacil[] = {
+        {"mesa", LoadTexture("./res/images/mesa.png")},
+        {"casa", LoadTexture("./res/images/casa.png")},
+        {"luna", LoadTexture("./res/images/luna.png")},
+        {"silla", LoadTexture("./res/images/silla.png")},
+        {"flor", LoadTexture("./res/images/flor.png")},
+        {"cielo", LoadTexture("./res/images/cielo.png")},
+        {"nino", LoadTexture("./res/images/nino.png")},
+        {"cama", LoadTexture("./res/images/cama.png")},
+        {"perro", LoadTexture("./res/images/perro.png")},
+        {"gato", LoadTexture("./res/images/gato.png")}
+    };
+
+    WordImagePair palabrasMedio[] = {
+        {"carpeta", LoadTexture("./res/images/carpeta.png")},
+        {"cocodrilo", LoadTexture("./res/images/cocodrilo.png")},
+        {"elefante", LoadTexture("./res/images/elefante.png")},
+        {"teléfono", LoadTexture("./res/images/telefono.png")},
+        {"zapato", LoadTexture("./res/images/zapato.png")},
+        {"ventana", LoadTexture("./res/images/ventana.png")},
+        {"naranja", LoadTexture("./res/images/naranja.png")},
+        {"zanahoria", LoadTexture("./res/images/zanahoria.png")},
+        {"dinosaurio", LoadTexture("./res/images/dinosaurio.png")},
+        {"homero", LoadTexture("./res/images/homero.png")}
+    };
+
+    WordImagePair palabrasDificil[] = {
+        {"refrigerador", LoadTexture("./res/images/refrigerador.png")},
+        {"calculadora", LoadTexture("./res/images/calculadora.png")},
+        {"hipopótamo", LoadTexture("./res/images/hipopotamo.png")},
+        {"camiseta", LoadTexture("./res/images/camiseta.png")},
+        {"bicicleta", LoadTexture("./res/images/bicicleta.png")},
+        {"mariposa", LoadTexture("./res/images/mariposa.png")},
+        {"paraguas", LoadTexture("./res/images/paraguas.png")},
+        {"película", LoadTexture("./res/images/pelicula.png")},
+        {"plátano", LoadTexture("./res/images/platano.png")},
+        {"girasol", LoadTexture("./res/images/girasol.png")}
+    };
+
+    const int numPalabrasFacil = sizeof(palabrasFacil) / sizeof(palabrasFacil[0]);
+    const int numPalabrasMedio = sizeof(palabrasMedio) / sizeof(palabrasMedio[0]);
+    const int numPalabrasDificil = sizeof(palabrasDificil) / sizeof(palabrasDificil[0]);
+
+    WordImagePair palabrasSeleccionadas[10];
+
+    // Variables de juego
+    int nivelSeleccionado = 0;
+    int palabraActual = 0;
+    WordImagePair palabraActualPair;
+    char textos[9][10]; // Matriz para las sílabas
+
+    // Mezclar posiciones
+    int posiciones[9];
+    for (int i = 0; i < 9; i++)
+        posiciones[i] = i;
+
+    char textosMezclados[9][10];
+
+    // Tamaño de la fuente
+    int fontSize = 20;
+
+    // Tamaño de los recuadros
+    int recuadroAncho = 200;
+    int recuadroAlto = 100;
+
+    // Espacio entre recuadros
+    int espacioX = recuadroAncho + 20;
+    int espacioY = recuadroAlto + 20;
+
+    // Coordenadas iniciales
+    int inicioX = 400;
+    int inicioY = 50;
+
+    // Tamaño del rectángulo grande para la imagen
+    int rectGrandeAncho = 300;
+    int rectGrandeAlto = screenHeight - 100;
+
+    // Coordenadas y tamaño del rectángulo inferior
+    int rectInferiorX = inicioX;
+    int rectInferiorY = inicioY + 3 * espacioY + 20;
+    int rectInferiorAncho = 3 * recuadroAncho + 2 * 20;
+    int rectInferiorAlto = 100;
+
+    // Texto concatenado y contador de selecciones
+    char textoConcatenado[1024] = "";
+    int seleccionCount = 0;
+    const int maxSelecciones = 3;
+
+    // Contador de vidas
+    int vidas = 5;
+
+    // Ángulo de rotación y dirección
+    float rotationAngle = 0.0f;
+    bool rotatingRight = true;
+
+    // Bucle principal
+    while (!WindowShouldClose())
+    {
+        if (currentScreen == MENU)
+        {
+            // Procesar entrada del usuario en el menú
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                Vector2 mousePos = GetMousePosition();
+                if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 - 100, screenHeight / 2 - 50, 200, 50}))
+                {
+                    currentScreen = LEVEL_SELECTION;
+                }
+                else if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 - 100, screenHeight / 2, 200, 50}))
+                {
+                    currentScreen = OPTIONS;
+                }
+                else if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 - 100, screenHeight / 2 + 50, 200, 50}))
+                {
+                    currentScreen = CREDITS;
+                }
+            }
+
+            BeginDrawing();
+
+            ClearBackground(RAYWHITE);
+
+            DrawText("Write & Fun", screenWidth / 2 - MeasureText("Write & Fun", 40) / 2, screenHeight / 4, 40, DARKGREEN);
+            DrawRectangle(screenWidth / 2 - 100, screenHeight / 2 - 50, 200, 50, LIGHTGRAY);
+            DrawText("JUGAR", screenWidth / 2 - MeasureText("JUGAR", 20) / 2, screenHeight / 2 - 35, 20, DARKGRAY);
+            DrawRectangle(screenWidth / 2 - 100, screenHeight / 2, 200, 50, LIGHTGRAY);
+            DrawText("OPCIONES", screenWidth / 2 - MeasureText("OPCIONES", 20) / 2, screenHeight / 2 + 15, 20, DARKGRAY);
+            DrawRectangle(screenWidth / 2 - 100, screenHeight / 2 + 50, 200, 50, LIGHTGRAY);
+            DrawText("CREDITOS", screenWidth / 2 - MeasureText("CREDITOS", 20) / 2, screenHeight / 2 + 65, 20, DARKGRAY);
+
+            EndDrawing();
+        }
+        else if (currentScreen == LEVEL_SELECTION)
+        {
+            // Procesar entrada del usuario en la selección de nivel
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                Vector2 mousePos = GetMousePosition();
+                if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 - 100, screenHeight / 2 - 100, 200, 50}))
+                {
+                    // Nivel fácil
+                    nivelSeleccionado = 1;
+                    selectRandomWordsAndImages(palabrasFacil, numPalabrasFacil, palabrasSeleccionadas, 10);
+                    palabraActual = 0;
+                    palabraActualPair = palabrasSeleccionadas[palabraActual];
+                    splitIntoSyllables(palabraActualPair.word, textos);
+                    shuffleArray(posiciones, 9);
+                    for (int i = 0; i < 9; i++)
+                        strcpy(textosMezclados[i], textos[posiciones[i]]);
+                    currentScreen = GAME;
+                }
+                else if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 - 100, screenHeight / 2 - 25, 200, 50}))
+                {
+                    // Nivel medio
+                    nivelSeleccionado = 2;
+                    selectRandomWordsAndImages(palabrasMedio, numPalabrasMedio, palabrasSeleccionadas, 10);
+                    palabraActual = 0;
+                    palabraActualPair = palabrasSeleccionadas[palabraActual];
+                    splitIntoSyllables(palabraActualPair.word, textos);
+                    shuffleArray(posiciones, 9);
+                    for (int i = 0; i < 9; i++)
+                        strcpy(textosMezclados[i], textos[posiciones[i]]);
+                    currentScreen = GAME;
+                }
+                else if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 - 100, screenHeight / 2 + 50, 200, 50}))
+                {
+                    // Nivel difícil
+                    nivelSeleccionado = 3;
+                    selectRandomWordsAndImages(palabrasDificil, numPalabrasDificil, palabrasSeleccionadas, 10);
+                    palabraActual = 0;
+                    palabraActualPair = palabrasSeleccionadas[palabraActual];
+                    splitIntoSyllables(palabraActualPair.word, textos);
+                    shuffleArray(posiciones, 9);
+                    for (int i = 0; i < 9; i++)
+                        strcpy(textosMezclados[i], textos[posiciones[i]]);
+                    currentScreen = GAME;
+                }
+            }
+
+            // Procesar entrada del usuario para el botón de regreso al menú
+            Vector2 mousePos = GetMousePosition();
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mousePos, (Rectangle){10, 10, 50, 50}))
+            {
+                currentScreen = MENU;
+            }
+
+            BeginDrawing();
+
+            ClearBackground(RAYWHITE);
+
+            DrawRectangleRounded((Rectangle){10, 10, 50, 50}, 0.5f, 10, LIGHTGRAY);
+            DrawText("<-", 18, 18, 30, DARKGRAY);
+            DrawText("Selecciona un nivel", screenWidth / 2 - MeasureText("Selecciona un nivel", 30) / 2, screenHeight / 4, 30, DARKGREEN);
+            DrawRectangle(screenWidth / 2 - 100, screenHeight / 2 - 100, 200, 50, LIGHTGRAY);
+            DrawText("Fácil", screenWidth / 2 - MeasureText("Fácil", 20) / 2, screenHeight / 2 - 85, 20, DARKGRAY);
+            DrawRectangle(screenWidth / 2 - 100, screenHeight / 2 - 25, 200, 50, LIGHTGRAY);
+            DrawText("Medio", screenWidth / 2 - MeasureText("Medio", 20) / 2, screenHeight / 2 - 10, 20, DARKGRAY);
+            DrawRectangle(screenWidth / 2 - 100, screenHeight / 2 + 50, 200, 50, LIGHTGRAY);
+            DrawText("Difícil", screenWidth / 2 - MeasureText("Difícil", 20) / 2, screenHeight / 2 + 65, 20, DARKGRAY);
+
+            EndDrawing();
+        }
+        else if (currentScreen == GAME)
+        {
+            // Actualizar ángulo de rotación
+            if (rotatingRight)
+            {
+                rotationAngle += 0.50f;
+                if (rotationAngle >= 10.0f) rotatingRight = false;
+            }
+            else
+            {
+                rotationAngle -= 0.50f;
+                if (rotationAngle <= -10.0f) rotatingRight = true;
+            }
+
+            // Procesar entrada del usuario en el juego
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && seleccionCount < maxSelecciones && vidas > 0)
+            {
+                Vector2 mousePos = GetMousePosition();
+                for (int fila = 0; fila < 3; fila++)
+                {
+                    for (int columna = 0; columna < 3; columna++)
+                    {
+                        int posX = inicioX + columna * espacioX;
+                        int posY = inicioY + fila * espacioY;
+                        if (CheckCollisionPointRec(mousePos, (Rectangle){posX, posY, recuadroAncho, recuadroAlto}))
+                        {
+                            strncat(textoConcatenado, textosMezclados[fila * 3 + columna], sizeof(textoConcatenado) - strlen(textoConcatenado) - 1);
+                            seleccionCount++;
+                        }
+                    }
+                }
+            }
+
+            // Verificar si se alcanzó el número máximo de selecciones
+            if (seleccionCount == maxSelecciones)
+            {
+                int matchFound = 0;
+                if (strcmp(textoConcatenado, palabraActualPair.word) == 0)
+                {
+                    matchFound = 1;
+                }
+                if (matchFound)
+                {
+                    palabraActual++;
+                    if (palabraActual < 10)
+                    {
+                        palabraActualPair = palabrasSeleccionadas[palabraActual];
+                        splitIntoSyllables(palabraActualPair.word, textos);
+                        shuffleArray(posiciones, 9);
+                        for (int i = 0; i < 9; i++)
+                            strcpy(textosMezclados[i], textos[posiciones[i]]);
+                    }
+                    else
+                    {
+                        // Si ya se han mostrado todas las palabras, regresar al menú de selección de nivel
+                        currentScreen = LEVEL_SELECTION;
+                        palabraActual = 0;
+                    }
+                }
+                else
+                {
+                    vidas--;
+                }
+                // Reiniciar para permitir nuevas selecciones
+                seleccionCount = 0;
+                textoConcatenado[0] = '\0';
+            }
+
+            // Procesar entrada del usuario para el botón de regreso al menú
+            Vector2 mousePos = GetMousePosition();
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mousePos, (Rectangle){10, 10, 50, 50}))
+            {
+                currentScreen = CONFIRM_EXIT;
+            }
+
+            BeginDrawing();
+
+            ClearBackground(RAYWHITE);
+
+            // Dibujar el botón de regreso al menú con esquinas redondeadas
+            DrawRectangleRounded((Rectangle){10, 10, 50, 50}, 0.5f, 10, LIGHTGRAY);
+            DrawText("<-", 18, 18, 30, DARKGRAY);
+
+            // Dibujar el rectángulo grande a la izquierda y mostrar la imagen correspondiente
+            DrawRectangle(50, 50, rectGrandeAncho, rectGrandeAlto, LIGHTGRAY);
+
+            // Calcular la posición y tamaño de la imagen para centrarla en el rectángulo
+            int imageX = 50 + rectGrandeAncho / 2;
+            int imageY = 50 + rectGrandeAlto / 2;
+            Rectangle sourceRec = {0.0f, 0.0f, (float)palabraActualPair.image.width, (float)palabraActualPair.image.height};
+            Rectangle destRec = {imageX, imageY, (float)palabraActualPair.image.width, (float)palabraActualPair.image.height};
+            Vector2 origin = {(float)palabraActualPair.image.width / 2, (float)palabraActualPair.image.height / 2};
+
+            DrawTexturePro(palabraActualPair.image, sourceRec, destRec, origin, rotationAngle, WHITE);
+
+            // Dibujar múltiples textos en una cuadrícula 3x3 usando bucles for anidados
+            for (int fila = 0; fila < 3; fila++)
+            {
+                for (int columna = 0; columna < 3; columna++)
+                {
+                    int posX = inicioX + columna * espacioX;
+                    int posY = inicioY + fila * espacioY;
+
+                    // Dibujar recuadro
+                    DrawRectangle(posX, posY, recuadroAncho, recuadroAlto, LIGHTGRAY);
+
+                    // Calcular la posición del texto para que esté centrado en el recuadro
+                    int textoAncho = MeasureText(textosMezclados[fila * 3 + columna], fontSize);
+                    int textoPosX = posX + (recuadroAncho - textoAncho) / 2;
+                    int textoPosY = posY + (recuadroAlto - fontSize) / 2;
+
+                    // Dibujar texto
+                    DrawText(textosMezclados[fila * 3 + columna], textoPosX, textoPosY, fontSize, BLACK);
+                }
+            }
+
+            // Dibujar el rectángulo inferior
+            DrawRectangle(rectInferiorX, rectInferiorY, rectInferiorAncho, rectInferiorAlto, LIGHTGRAY);
+
+            // Dibujar el texto concatenado en el rectángulo inferior y centrarlo
+            int textoConcatenadoAncho = MeasureText(textoConcatenado, fontSize);
+            int textoConcatenadoPosX = rectInferiorX + (rectInferiorAncho - textoConcatenadoAncho) / 2;
+            int textoConcatenadoPosY = rectInferiorY + (rectInferiorAlto - fontSize) / 2;
+            DrawText(textoConcatenado, textoConcatenadoPosX, textoConcatenadoPosY, fontSize, BLACK);
+
+            // Mostrar las vidas restantes
+            char vidasTexto[20];
+            sprintf(vidasTexto, "Vidas: %d", vidas);
+            DrawText(vidasTexto, screenWidth - 150, 20, fontSize, RED);
+
+            EndDrawing();
+        }
+        else if (currentScreen == CONFIRM_EXIT)
+        {
+            // Procesar entrada del usuario en la pantalla de confirmación de salida
+            Vector2 mousePos = GetMousePosition();
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 - 100, screenHeight / 2, 80, 40}))
+                {
+                    currentScreen = MENU;
+                    // Resetear variables del juego
+                    seleccionCount = 0;
+                    textoConcatenado[0] = '\0';
+                    vidas = 5;
+                }
+                else if (CheckCollisionPointRec(mousePos, (Rectangle){screenWidth / 2 + 20, screenHeight / 2, 80, 40}))
+                {
+                    currentScreen = GAME;
+                }
+            }
+
+            BeginDrawing();
+
+            ClearBackground(RAYWHITE);
+
+            DrawText("¿Estás seguro de querer regresar al menú principal?", screenWidth / 2 - MeasureText("¿Estás seguro de querer regresar al menú principal?", 20) / 2, screenHeight / 2 - 40, 20, DARKGRAY);
+
+            // Dibujar botones de confirmación
+            DrawRectangle(screenWidth / 2 - 100, screenHeight / 2, 80, 40, LIGHTGRAY);
+            DrawText("Sí", screenWidth / 2 - 100 + (80 - MeasureText("Sí", 20)) / 2, screenHeight / 2 + 10, 20, DARKGRAY);
+            DrawRectangle(screenWidth / 2 + 20, screenHeight / 2, 80, 40, LIGHTGRAY);
+            DrawText("No", screenWidth / 2 + 20 + (80 - MeasureText("No", 20)) / 2, screenHeight / 2 + 10, 20, DARKGRAY);
+
+            EndDrawing();
+        }
+        else if (currentScreen == OPTIONS)
+        {
+            // Procesar entrada del usuario para el botón de regreso al menú
+            Vector2 mousePos = GetMousePosition();
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mousePos, (Rectangle){10, 10, 50, 50}))
+            {
+                currentScreen = MENU;
+            }
+
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawRectangleRounded((Rectangle){10, 10, 50, 50}, 0.5f, 10, LIGHTGRAY);
+            DrawText("<-", 18, 18, 30, DARKGRAY);
+            DrawText("OPCIONES", screenWidth / 2 - MeasureText("OPCIONES", 40) / 2, screenHeight / 2, 40, DARKGRAY);
+            EndDrawing();
+        }
+        else if (currentScreen == CREDITS)
+        {
+            // Procesar entrada del usuario para el botón de regreso al menú
+            Vector2 mousePos = GetMousePosition();
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mousePos, (Rectangle){10, 10, 50, 50}))
+            {
+                currentScreen = MENU;
+            }
+
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawRectangleRounded((Rectangle){10, 10, 50, 50}, 0.5f, 10, LIGHTGRAY);
+            DrawText("<-", 18, 18, 30, DARKGRAY);
+            DrawText("CREDITOS", screenWidth / 2 - MeasureText("CREDITOS", 40) / 2, screenHeight / 2, 40, DARKGRAY);
+            EndDrawing();
+        }
+    }
+
+    // Desinicialización
+    for (int i = 0; i < numPalabrasFacil; i++)
+        UnloadTexture(palabrasFacil[i].image);
+    for (int i = 0; i < numPalabrasMedio; i++)
+        UnloadTexture(palabrasMedio[i].image);
+    for (int i = 0; i < numPalabrasDificil; i++)
+        UnloadTexture(palabrasDificil[i].image);
+    CloseWindow();
+
+    return 0;
+}
