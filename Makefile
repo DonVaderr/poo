@@ -417,4 +417,8 @@ endif
 ifeq ($(PLATFORM),PLATFORM_WEB)
 	del *.o *.html *.js
 endif
+<<<<<<< HEAD
 	@echo Cleaning done
+=======
+	@echo Cleaning done
+>>>>>>> 2adac78f85fe997c1f12a458d3c0887a29840ef6
