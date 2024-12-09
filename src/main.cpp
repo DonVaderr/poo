@@ -740,7 +740,6 @@ public:
         int maxSelecciones=game.GetMaxSelecciones();
         char *textoConcatenado=game.GetTextoConcatenado();
         const char **textosMezclados=game.GetTextosMezclados();
-        ParejaPalabraImagen &palabraActualPareja=game.GetPalabraActualPareja();
 
         float anchoRecuadro = ancho / 8;
         float altoRecuadro = alto / 8;
@@ -790,7 +789,6 @@ public:
 
         DrawRectangle(0,0,(int)(ancho*(game.GetAciertos()/10.0f)),20,GREEN);
 
-        int palabraActual=game.GetPalabraActual();
         ParejaPalabraImagen &palabraActualPareja=game.GetPalabraActualPareja();
 
         float anchoRecuadro = ancho / 8;
