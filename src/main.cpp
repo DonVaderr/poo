@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <cstring>
 
-// Enumeración para identificar las pantallas
+// Enumeracion para identificar las pantallas
 enum class PantallaJuego {
     MENU,
     SELECCION_NIVEL,
@@ -17,7 +17,7 @@ enum class PantallaJuego {
     JUEGO_TERMINADO
 };
 
-// Declaración adelantada de la clase Game
+// Declaracion adelantada de la clase Game
 class Game;
 
 // Clase base abstracta para las pantallas
@@ -63,7 +63,7 @@ static void seleccionarPalabrasEImagenesAleatorias(ParejaPalabraImagen *arregloF
     free(indices);
 }
 
-// Clase Button para encapsular la lógica de un botón
+// Clase Button para encapsular la logica de un boton
 class Button {
 private:
     Rectangle rect;
@@ -162,7 +162,12 @@ private:
     const char *textos[9];
     int posiciones[9];
     const char *textosMezclados[9];
-    char textoConcatenado[20];
+
+    // Definición de la constante para el tamaño de textoConcatenado
+    static const size_t TEXTO_CONCATENADO_SIZE = 20;
+
+    // Actualización de la declaración de textoConcatenado utilizando la constante
+    char textoConcatenado[TEXTO_CONCATENADO_SIZE];
     int contadorSeleccion = 0;
     int maxSelecciones = 3;
     int vidas = 5;
@@ -198,7 +203,7 @@ public:
 
         PlayMusicStream(musicaFondo);
 
-        // Inicializar palabras (Fácil)
+        // Inicializar palabras (Facil)
         {
             const char* f1[9]={"ca","sa","lo","es","za","er","la","ta","he"};
             palabrasFacil[0]=ParejaPalabraImagen("casa",f1,LoadTexture("./res/images/casa.png"));
@@ -266,7 +271,7 @@ public:
             numPalabrasMedio=10;
         }
 
-        // Difícil
+        // Dificil
         {
             const char* d1[9]={"za","na","ho","ria","re","zi","no","lu","mi"};
             palabrasDificil[0]=ParejaPalabraImagen("zanahoria",d1,LoadTexture("./res/images/zanahoria.png"));
@@ -397,6 +402,9 @@ public:
     const char** GetTextosMezclados() { return textosMezclados; }
     char* GetTextoConcatenado() { return textoConcatenado; }
 
+    // Añadido getter para el tamaño de textoConcatenado
+    size_t GetTextoConcatenadoSize() const { return TEXTO_CONCATENADO_SIZE; }
+
     int &GetContadorSeleccion() { return contadorSeleccion; }
     int GetMaxSelecciones() const { return maxSelecciones; }
     int &GetMaxSeleccionesRef() { return maxSelecciones; }
@@ -506,7 +514,7 @@ public:
     }
 };
 
-// Pantallas específicas
+// Pantallas especificas
 
 class MenuScreen : public Screen {
 public:
@@ -577,9 +585,9 @@ public:
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnFacil({ancho/2 -100,alto/2 -100,200,50},"Fácil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnFacil({ancho/2 -100,alto/2 -100,200,50},"Facil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         Button btnMedio({ancho/2 -100,alto/2 -25,200,50},"Medio",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
-        Button btnDificil({ancho/2 -100,alto/2 +50,200,50},"Difícil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnDificil({ancho/2 -100,alto/2 +50,200,50},"Dificil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
 
         btnFacil.Draw();
         btnMedio.Draw();
@@ -619,7 +627,7 @@ public:
         Button btnBack({10,30,50,50},"<-",30,WHITE,GRAY,DARKGRAY,DARKGRAY,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnBack.Draw();
 
-        Button btnMusica({ancho/2 -100,(float)alto/2 -50,300,50}, game.IsMusicaEnabled()?"Desactivar Música":"Activar Música",
+        Button btnMusica({ancho/2 -100,(float)alto/2 -50,300,50}, game.IsMusicaEnabled()?"Desactivar Musica":"Activar Musica",
                          30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnMusica.Draw();
 
@@ -638,7 +646,7 @@ public:
         float alto=GetScreenHeight();
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mousePos,{(float)ancho/2 -100,(float)alto/2,80,40})) {
-                // Sí
+                // Si
                 game.ChangeScreen(PantallaJuego::MENU);
                 game.ResetJuego();
             }
@@ -658,7 +666,7 @@ public:
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnSi({(float)ancho/2 -100,(float)alto/2,80,40},"Sí",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnSi({(float)ancho/2 -100,(float)alto/2,80,40},"Si",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         Button btnNo({(float)ancho/2 +20,(float)alto/2,80,40},"No",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
 
         btnSi.Draw();
@@ -688,7 +696,7 @@ public:
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnMenu({(float)ancho/2 -100,(float)alto/4,150,50},"Menú",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnMenu({(float)ancho/2 -100,(float)alto/4,150,50},"Menu",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnMenu.Draw();
     }
     PantallaJuego GetType() const override { return PantallaJuego::FELICITACIONES; }
@@ -715,7 +723,7 @@ public:
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnMenu({(float)ancho/2 -100,(float)alto/2,150,50},"Menú",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnMenu({(float)ancho/2 -100,(float)alto/2,150,50},"Menu",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnMenu.Draw();
     }
     PantallaJuego GetType() const override { return PantallaJuego::JUEGO_TERMINADO; }
@@ -754,7 +762,8 @@ public:
                     float posX = inicioX + columna * espacioX;
                     float posY = inicioY + fila * espacioY;
                     if (CheckCollisionPointRec(mousePos,{posX,posY,anchoRecuadro,altoRecuadro})) {
-                        strncat(textoConcatenado,textosMezclados[fila*3+columna],sizeof(game.GetTextoConcatenado()) - strlen(textoConcatenado)-1);
+                        // Uso de GetTextoConcatenadoSize() para obtener el tamaño correcto
+                        strncat(textoConcatenado, textosMezclados[fila*3+columna], game.GetTextoConcatenadoSize() - strlen(textoConcatenado) - 1);
                         game.GetContadorSeleccion()++;
                     }
                 }
@@ -867,7 +876,6 @@ void Game::ChangeScreen(PantallaJuego newScreen) {
             currentScreen = new JuegoTerminadoScreen();
             break;
         case PantallaJuego::SALIR:
-            // No se crea pantalla, se cerrará el juego en el bucle principal
             break;
     }
 }
