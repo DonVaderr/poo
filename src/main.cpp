@@ -741,11 +741,6 @@ public:
         int maxSelecciones=game.GetMaxSelecciones();
         char *textoConcatenado=game.GetTextoConcatenado();
         const char **textosMezclados=game.GetTextosMezclados();
-<<<<<<< HEAD
-        
-=======
-        ParejaPalabraImagen &palabraActualPareja=game.GetPalabraActualPareja();
->>>>>>> ecd17a01db1f33fd32bd7c064887c193663d292a
 
         float anchoRecuadro = ancho / 8;
         float altoRecuadro = alto / 8;
@@ -795,11 +790,6 @@ public:
 
         DrawRectangle(0,0,(int)(ancho*(game.GetAciertos()/10.0f)),20,GREEN);
 
-<<<<<<< HEAD
-        
-=======
-        int palabraActual=game.GetPalabraActual();
->>>>>>> ecd17a01db1f33fd32bd7c064887c193663d292a
         ParejaPalabraImagen &palabraActualPareja=game.GetPalabraActualPareja();
 
         float anchoRecuadro = ancho / 8;
@@ -878,10 +868,7 @@ void Game::ChangeScreen(PantallaJuego newScreen) {
             currentScreen = new JuegoTerminadoScreen();
             break;
         case PantallaJuego::SALIR:
-<<<<<<< HEAD
-=======
             // No se crea pantalla, se cerrará el juego en el bucle principal
->>>>>>> ecd17a01db1f33fd32bd7c064887c193663d292a
             break;
     }
 }
