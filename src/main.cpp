@@ -17,7 +17,7 @@ enum class PantallaJuego {
     JUEGO_TERMINADO
 };
 
-// Forward declaration de la clase Game
+// Declaración adelantada de la clase Game
 class Game;
 
 // Clase base abstracta para las pantallas
@@ -123,7 +123,7 @@ public:
     void SetText(const std::string &t) { text = t; }
 };
 
-// Clase principal Game: mantiene estado global, recursos, y permite cambiar de pantalla
+// Clase principal Game: mantiene el estado global, recursos, y permite cambiar de pantalla
 class Game {
 private:
     // Recursos
@@ -147,7 +147,7 @@ private:
     bool musicaFondoEnabled = true;
     bool efectosSonidoEnabled = true;
 
-    // Palabras por nivel (del código original)
+    // Palabras por nivel
     ParejaPalabraImagen palabrasFacil[10];
     ParejaPalabraImagen palabrasMedio[10];
     ParejaPalabraImagen palabrasDificil[10];
@@ -182,8 +182,8 @@ public:
         SetTargetFPS(60);
 
         musicaFondo = LoadMusicStream("./res/music/fondo.mp3");
-        hoverSound = LoadSound("path/to/your/hover/sound.wav");
-        clickSound = LoadSound("path/to/your/click/sound.wav");
+        hoverSound = LoadSound("ruta/a/tu/sonido/hover.wav");
+        clickSound = LoadSound("./res/music/click.wav");
         aciertoSound = LoadSound("./res/music/correct.mp3");
         errorSound = LoadSound("./res/music/fail.mp3");
         font = LoadFont("./res/fonts/crepes.ttf");
@@ -198,9 +198,8 @@ public:
 
         PlayMusicStream(musicaFondo);
 
-        // Inicializar palabras (copiadas del código original)
+        // Inicializar palabras (Fácil)
         {
-            // Fácil
             const char* f1[9]={"ca","sa","lo","es","za","er","la","ta","he"};
             palabrasFacil[0]=ParejaPalabraImagen("casa",f1,LoadTexture("./res/images/casa.png"));
 
@@ -233,8 +232,8 @@ public:
             numPalabrasFacil=10;
         }
 
+        // Medio
         {
-            // Medio
             const char* m1[9]={"via","je","ros","se","lo","za","ni","fu","ti"};
             palabrasMedio[0]=ParejaPalabraImagen("viajeros",m1,LoadTexture("./res/images/viajeros.png"));
 
@@ -267,8 +266,8 @@ public:
             numPalabrasMedio=10;
         }
 
+        // Difícil
         {
-            // Difícil
             const char* d1[9]={"za","na","ho","ria","re","zi","no","lu","mi"};
             palabrasDificil[0]=ParejaPalabraImagen("zanahoria",d1,LoadTexture("./res/images/zanahoria.png"));
 
@@ -532,8 +531,8 @@ public:
         float alto=GetScreenHeight();
         Font f=game.GetFontGame();
         Texture2D fondo=game.GetFondoMenu();
-        float ratioAncho=ancho/fondo.width;
-        float ratioAlto=alto/fondo.height;
+        float ratioAncho=ancho/(float)fondo.width;
+        float ratioAlto=alto/(float)fondo.height;
         float ratio=(ratioAncho>ratioAlto)? ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
@@ -573,14 +572,14 @@ public:
         float alto=GetScreenHeight();
         Font f=game.GetFontGame();
         Texture2D fondo=game.GetFondoNiveles();
-        float ratioAncho=ancho/fondo.width;
-        float ratioAlto=alto/fondo.height;
+        float ratioAncho=ancho/(float)fondo.width;
+        float ratioAlto=alto/(float)fondo.height;
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnFacil({ancho/2 -100,alto/2 -100,200,50},"Facil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnFacil({ancho/2 -100,alto/2 -100,200,50},"Fácil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         Button btnMedio({ancho/2 -100,alto/2 -25,200,50},"Medio",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
-        Button btnDificil({ancho/2 -100,alto/2 +50,200,50},"Dificil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnDificil({ancho/2 -100,alto/2 +50,200,50},"Difícil",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
 
         btnFacil.Draw();
         btnMedio.Draw();
@@ -612,15 +611,15 @@ public:
         float alto=GetScreenHeight();
         Font f=game.GetFontGame();
         Texture2D fondo=game.GetFondoOpciones();
-        float ratioAncho=ancho/fondo.width;
-        float ratioAlto=alto/fondo.height;
+        float ratioAncho=ancho/(float)fondo.width;
+        float ratioAlto=alto/(float)fondo.height;
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
         Button btnBack({10,30,50,50},"<-",30,WHITE,GRAY,DARKGRAY,DARKGRAY,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnBack.Draw();
 
-        Button btnMusica({ancho/2 -100,(float)alto/2 -50,300,50}, game.IsMusicaEnabled()?"Desactivar Musica":"Activar Musica",
+        Button btnMusica({ancho/2 -100,(float)alto/2 -50,300,50}, game.IsMusicaEnabled()?"Desactivar Música":"Activar Música",
                          30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnMusica.Draw();
 
@@ -639,7 +638,7 @@ public:
         float alto=GetScreenHeight();
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mousePos,{(float)ancho/2 -100,(float)alto/2,80,40})) {
-                // Si
+                // Sí
                 game.ChangeScreen(PantallaJuego::MENU);
                 game.ResetJuego();
             }
@@ -654,12 +653,12 @@ public:
         float alto=GetScreenHeight();
         Font f=game.GetFontGame();
         Texture2D fondo=game.GetFondoConfirmar();
-        float ratioAncho=ancho/fondo.width;
-        float ratioAlto=alto/fondo.height;
+        float ratioAncho=ancho/(float)fondo.width;
+        float ratioAlto=alto/(float)fondo.height;
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnSi({(float)ancho/2 -100,(float)alto/2,80,40},"Si",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnSi({(float)ancho/2 -100,(float)alto/2,80,40},"Sí",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         Button btnNo({(float)ancho/2 +20,(float)alto/2,80,40},"No",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
 
         btnSi.Draw();
@@ -684,12 +683,12 @@ public:
         float alto=GetScreenHeight();
         Font f=game.GetFontGame();
         Texture2D fondo=game.GetFondoGanaste();
-        float ratioAncho=ancho/fondo.width;
-        float ratioAlto=alto/fondo.height;
+        float ratioAncho=ancho/(float)fondo.width;
+        float ratioAlto=alto/(float)fondo.height;
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnMenu({(float)ancho/2 -100,(float)alto/4,150,50},"Menu",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnMenu({(float)ancho/2 -100,(float)alto/4,150,50},"Menú",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnMenu.Draw();
     }
     PantallaJuego GetType() const override { return PantallaJuego::FELICITACIONES; }
@@ -711,12 +710,12 @@ public:
         float alto=GetScreenHeight();
         Font f=game.GetFontGame();
         Texture2D fondo=game.GetFondoPerdiste();
-        float ratioAncho=ancho/fondo.width;
-        float ratioAlto=alto/fondo.height;
+        float ratioAncho=ancho/(float)fondo.width;
+        float ratioAlto=alto/(float)fondo.height;
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
-        Button btnMenu({(float)ancho/2 -100,(float)alto/2,150,50},"Menu",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
+        Button btnMenu({(float)ancho/2 -100,(float)alto/2,150,50},"Menú",30,WHITE,GRAY,DARKGRAY,BLACK,game.GetHoverSound(),game.GetClickSound(),game.IsEfectosEnabled(),f);
         btnMenu.Draw();
     }
     PantallaJuego GetType() const override { return PantallaJuego::JUEGO_TERMINADO; }
@@ -781,8 +780,8 @@ public:
         float alto=GetScreenHeight();
         Font f=game.GetFontGame();
         Texture2D fondo=game.GetFondoJuego();
-        float ratioAncho=ancho/fondo.width;
-        float ratioAlto=alto/fondo.height;
+        float ratioAncho=ancho/(float)fondo.width;
+        float ratioAlto=alto/(float)fondo.height;
         float ratio=(ratioAncho>ratioAlto)?ratioAncho:ratioAlto;
         DrawTexturePro(fondo,{0,0,(float)fondo.width,(float)fondo.height},{0,0,fondo.width*ratio,fondo.height*ratio},{0,0},0,WHITE);
 
